@@ -1,4 +1,5 @@
 // Command to compile : g++ -fopenmp hpc2-merge-sort.cpp -o mergesort
+// execute : mergesort.exe
 
 #include <iostream>
 #include <stdlib.h>
