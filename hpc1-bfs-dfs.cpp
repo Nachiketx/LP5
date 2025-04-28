@@ -40,28 +40,41 @@ void bfs(int start, const vector<vector<int>>& adj, vector<bool>& visited) {
 }
 
 void dfs(int node, const vector<vector<int>>& adj, vector<bool>& visited) {
-    visited[node] = true;
-    cout << "Visited (DFS) Node: " << node << endl;
+    int thread_id = omp_get_thread_num();
 
-    #pragma omp parallel for
+    #pragma omp critical
+    {
+        visited[node] = true;
+        cout << "Thread " << thread_id << " visited (DFS) Node: " << node << endl;
+    }
+
     for (int i = 0; i < adj[node].size(); ++i) {
         int neighbor = adj[node][i];
-        int thread_id = omp_get_thread_num(); 
+        
+        bool need_visit = false;
+        
+        #pragma omp critical
+        {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                need_visit = true;
+                cout << "Thread " << thread_id << " preparing DFS for neighbor: " << neighbor << endl;
+            }
+        }
 
-        if (!visited[neighbor]) {
-            #pragma omp critical
+        if (need_visit) {
+            #pragma omp task
             {
-                if (!visited[neighbor]) {  
-                    cout << "Thread " << thread_id << " processing neighbor (DFS): " << neighbor << endl;
-                    dfs(neighbor, adj, visited);
-                }
+                dfs(neighbor, adj, visited);
             }
         }
     }
+
+    #pragma omp taskwait
 }
 
 int main() {
-    omp_set_num_threads(4);
+    // omp_set_num_threads(8);
 
     int n, m; 
     cout << "Enter number of nodes and edges: ";
@@ -89,7 +102,11 @@ int main() {
 
     cout << "\nDFS starting from node 0:\n";
     double start_dfs = omp_get_wtime(); 
-    dfs(0, adj, visited);
+    #pragma omp parallel
+    {
+        #pragma omp single
+        dfs(0, adj, visited);
+    }    
     double end_dfs = omp_get_wtime();
     cout << "Time taken for DFS: " << (end_dfs - start_dfs) << " seconds\n";
 

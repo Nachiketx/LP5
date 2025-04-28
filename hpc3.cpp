@@ -7,7 +7,7 @@ using namespace std;
 
 void min_reduction(vector<int>& arr) {
   int min_value = INT_MAX;
-  #pragma omp parallel for reduction(min: min_value)
+  #pragma omp parallel for
   for (int i = 0; i < arr.size(); i++) {
     if (arr[i] < min_value) {
       min_value = arr[i];
@@ -18,7 +18,7 @@ void min_reduction(vector<int>& arr) {
 
 void max_reduction(vector<int>& arr) {
   int max_value = INT_MIN;
-  #pragma omp parallel for reduction(max: max_value)
+  #pragma omp parallel for
   for (int i = 0; i < arr.size(); i++) {
     if (arr[i] > max_value) {
       max_value = arr[i];
@@ -29,7 +29,7 @@ void max_reduction(vector<int>& arr) {
 
 void sum_reduction(vector<int>& arr) {
   int sum = 0;
-   #pragma omp parallel for reduction(+: sum)
+   #pragma omp parallel for
    for (int i = 0; i < arr.size(); i++) {
     sum += arr[i];
   }
@@ -38,7 +38,7 @@ void sum_reduction(vector<int>& arr) {
 
 void average_reduction(vector<int>& arr) {
   int sum = 0;
-  #pragma omp parallel for reduction(+: sum)
+  #pragma omp parallel for
   for (int i = 0; i < arr.size(); i++) {
     sum += arr[i];
   }
