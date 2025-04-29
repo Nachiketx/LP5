@@ -9,44 +9,53 @@ class MergeSort
 private:
     vector<int> data;
 
-    void merge(int i1, int j1, int i2, int j2)
+    void merge(int start1, int end1, int start2, int end2)
     {
         vector<int> temp;
-        int i = i1, j = i2;
 
-        while (i <= j1 && j <= j2)
+        int i = start1, j = start2;
+
+        while (i <= end1 && j <= end2)
         {
             if (data[i] < data[j])
-                temp.push_back(data[i++]);
+            {
+                temp.push_back(data[i]);
+                i++;
+            }
             else
-                temp.push_back(data[j++]);
+            {
+                temp.push_back(data[j]);
+                j++;
+            }
         }
-
-        while (i <= j1)
-            temp.push_back(data[i++]);
-
-        while (j <= j2)
-            temp.push_back(data[j++]);
-
+        while (i <= end1)
+        {
+            temp.push_back(data[i]);
+            i++;
+        }
+        while (j <= end2)
+        {
+            temp.push_back(data[j]);
+            j++;
+        }
         for (int k = 0; k < temp.size(); k++)
         {
-            data[i1 + k] = temp[k];
+            data[start1 + k] = temp[k];
         }
     }
-
     void mergesort(int i, int j)
     {
         if (i < j)
         {
             int mid = (i + j) / 2;
 
-            #pragma omp parallel sections
+#pragma omp parallel sections
             {
-                #pragma omp section
+#pragma omp section
                 {
                     mergesort(i, mid);
                 }
-                #pragma omp section
+#pragma omp section
                 {
                     mergesort(mid + 1, j);
                 }
@@ -150,7 +159,7 @@ public:
         {
             swapped = false;
             int first = i % 2;
-#pragma omp parallel for shared(first) reduction(| : swapped)
+            #pragma omp parallel for shared(first) reduction(| : swapped)
             for (int j = first; j < n - 1; j += 2)
             {
                 if (data[j] > data[j + 1])
@@ -181,15 +190,11 @@ public:
 
 int main()
 {
-    int n;
-    cout << "\nEnter total number of elements: ";
-    cin >> n;
-
+    int n = 100000; // 10 million elements
     vector<int> input(n);
-    cout << "\nEnter elements: ";
     for (int i = 0; i < n; i++)
     {
-        cin >> input[i];
+        input[i] = rand() % 100000; // Random numbers between 0 and 100000
     }
 
     // BUBBLE SORT
@@ -199,16 +204,17 @@ int main()
     bubbleSorter.sequentialSort();
     double end_time = omp_get_wtime();
     cout << "\nBubble Sort - Sequential:" << endl;
-    bubbleSorter.print();
+    // bubbleSorter.print();
     cout << "Time taken: " << end_time - start_time << " seconds" << endl;
 
+    cout<<input[n-1]<<endl;
     bubbleSorter.reset(input);
 
     start_time = omp_get_wtime();
     bubbleSorter.parallelSort();
     end_time = omp_get_wtime();
     cout << "\nBubble Sort - Parallel:" << endl;
-    bubbleSorter.print();
+    // bubbleSorter.print();
     cout << "Time taken: " << end_time - start_time << " seconds" << endl;
 
     // MERGE SORT
@@ -218,7 +224,7 @@ int main()
     mergeSorter.sequentialSort();
     end_time = omp_get_wtime();
     cout << "\nMerge Sort - Sequential:" << endl;
-    mergeSorter.print();
+    // mergeSorter.print();
     cout << "Time taken: " << end_time - start_time << " seconds" << endl;
 
     mergeSorter.reset(input);
@@ -227,7 +233,7 @@ int main()
     mergeSorter.parallelSort();
     end_time = omp_get_wtime();
     cout << "\nMerge Sort - Parallel:" << endl;
-    mergeSorter.print();
+    // mergeSorter.print();
     cout << "Time taken: " << end_time - start_time << " seconds" << endl;
 
     return 0;
